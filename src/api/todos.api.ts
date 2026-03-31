@@ -31,8 +31,12 @@ import {
  * @throws Error if request fails
  */
 export const getTodos = async (): Promise<Todo[]> => {
-  // TODO: Implement
-  throw new Error('getTodos not implemented');
+  try {
+    const response = await apiClient.get<TodosResponse>('/todos');
+    return response.data.todos;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 };
 
 /**
@@ -46,8 +50,12 @@ export const getTodos = async (): Promise<Todo[]> => {
  * @throws Error if creation fails
  */
 export const createTodo = async (todo: CreateTodoRequest): Promise<Todo> => {
-  // TODO: Implement
-  throw new Error('createTodo not implemented');
+  try {
+    const response = await apiClient.post<TodoResponse>('/todos', todo);
+    return response.data.todo;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 };
 
 /**
@@ -62,8 +70,12 @@ export const createTodo = async (todo: CreateTodoRequest): Promise<Todo> => {
  * @throws Error if update fails
  */
 export const updateTodo = async (id: number, updates: UpdateTodoRequest): Promise<Todo> => {
-  // TODO: Implement
-  throw new Error('updateTodo not implemented');
+  try {
+    const response = await apiClient.patch<TodoResponse>(`/todos/${id}`, updates);
+    return response.data.todo;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 };
 
 /**
@@ -77,6 +89,9 @@ export const updateTodo = async (id: number, updates: UpdateTodoRequest): Promis
  * @throws Error if deletion fails
  */
 export const deleteTodo = async (id: number): Promise<void> => {
-  // TODO: Implement
-  throw new Error('deleteTodo not implemented');
+  try {
+    await apiClient.delete(`/todos/${id}`);
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 };
