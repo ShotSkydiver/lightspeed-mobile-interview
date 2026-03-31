@@ -24,31 +24,57 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, StyleSheet } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
 import { RootStackScreenProps } from '../navigation/types';
-// TODO: Import Button, Input, LoadingSpinner from components
-// TODO: Import useAuth hook
-// TODO: Import theme and create styles
+import { Button } from '@/components/common/Button';
+import { Input } from '@/components/common/Input';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { useAuth } from '@/context/AuthContext';
+import { styles as appStyles } from '@/styles/App.styles';
 
 type Props = RootStackScreenProps<'Login'>;
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
-  // TODO: Add state for email and password
-  // TODO: Get login function and state from useAuth
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const authContext = useAuth();
 
-  // TODO: Implement handleLogin function
+  const handleLogin = async () => {
+    try {
+      await authContext.login(email, password);
+
+      setEmail('');
+      setPassword('');
+
+      // No need to manually navigate to TodosScreen, RootNavigator will automatically switch to that screen once isAuthenticated is true
+      // navigation.replace('Todos')
+    } catch (err) {
+      console.error('handleLogin error:', err);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <Text style={styles.title}>Login Screen</Text>
-        <Text style={styles.subtitle}>TODO: Implement login form</Text>
+        <Text style={styles.subtitle}>Enter your email and password below.</Text>
 
-        {/* TODO: Add Input components for email and password */}
-        {/* TODO: Add Button component for login */}
-        {/* TODO: Show error message if error exists */}
-        {/* TODO: Show loading spinner while isLoading */}
-      </View>
+        <View style={appStyles.form}>
+          <Input placeholder="Email" value={email} onChangeText={text => setEmail(text)} />
+          <View style={styles.spacer} />
+          <Input placeholder="Password" value={password} onChangeText={text => setPassword(text)} secureTextEntry />
+        </View>
+
+        <Button title="Log in" disabled={authContext.isLoading || (!email || !password)} onPress={handleLogin} />
+
+        {authContext.error && (
+          <Text style={appStyles.error}>{authContext.error}</Text>
+        )}
+
+        {authContext.isLoading && (
+          <LoadingSpinner text="Logging in..." />
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -56,6 +82,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollView: {
     backgroundColor: '#f5f5f5',
   },
   content: {
@@ -72,7 +100,11 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#666',
+    marginBottom: 20,
   },
+  spacer: {
+    height: 12,
+  }
 });
 
 export default LoginScreen;

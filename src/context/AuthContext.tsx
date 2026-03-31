@@ -55,7 +55,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const checkExistingToken = async () => {
       try {
+        console.warn('before check existing??');
         const existingToken = await getItem(STORAGE_KEYS.AUTH_TOKEN);
+        console.warn('existing?? ', existingToken);
 
         if (existingToken) {
           const currentUser = await getCurrentUser();
@@ -63,8 +65,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
           setUser(currentUser);
           setToken(existingToken);
-          setIsLoading(false);
         }
+
+        setIsLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to check existing auth token');
         setIsLoading(false);
@@ -86,8 +89,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setError(null);
 
       const loginResponse = await apiLogin({ email, password });
-      console.warn('login response: ', loginResponse);
-
       await setItem(STORAGE_KEYS.AUTH_TOKEN, loginResponse.token);
 
       setUser(loginResponse.user);

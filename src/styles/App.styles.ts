@@ -28,6 +28,12 @@ export const styles = StyleSheet.create({
     fontSize: typography.fontSize.md,
     color: colors.textSecondary,
   },
+  error: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.danger,
+    marginVertical: spacing.sm,
+  },
   form: {
     width: '100%',
     maxWidth: 400,
