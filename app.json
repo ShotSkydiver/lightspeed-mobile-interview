@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Todo App",
+    "slug": "react-native-todo-interview",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#ffffff",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.interview.todoapp"
+    },
+    "android": {
+      "package": "com.interview.todoapp"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
