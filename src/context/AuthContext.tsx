@@ -25,9 +25,9 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthContextValue, User } from '../types/auth.types';
-// TODO: Import API functions from auth.api
-// TODO: Import storage functions from storage
-// TODO: Import STORAGE_KEYS from constants
+import { login as apiLogin, getCurrentUser, logout as apiLogout } from '../api/auth.api';
+import { setItem, getItem, removeItem } from '@/utils/storage';
+import { STORAGE_KEYS } from '@/utils/constants';
 
 // Create the context with undefined as initial value
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -38,7 +38,6 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
  * Wraps the app and provides authentication state and functions to all children.
  */
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // TODO: Add state for user, token, isLoading, error
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,14 +53,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * 4. Set isLoading to false when done
    */
   useEffect(() => {
-    // TODO: Implement token check
-    setIsLoading(false); // Placeholder - remove when implementing
+    const checkExistingToken = async () => {
+      try {
+        const existingToken = await getItem(STORAGE_KEYS.AUTH_TOKEN);
+
+        if (existingToken) {
+          const currentUser = await getCurrentUser();
+          // TODO: SHOULD I ADD THE CURRENTUSER OBJECT TO STORAGE AS WELL? with STORAGE_KEYS.USER_DATA
+
+          setUser(currentUser);
+          setToken(existingToken);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to check existing auth token');
+        setIsLoading(false);
+      }
+    };
+
+    checkExistingToken();
   }, []);
 
   /**
    * Login function
    *
-   * TODO: Implement this function
    * @param email - User email
    * @param password - User password
    */
@@ -70,11 +85,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(true);
       setError(null);
 
-      // TODO: Call login API
-      // TODO: Save token to AsyncStorage
-      // TODO: Update state with user and token
+      const loginResponse = await apiLogin({ email, password });
+      console.warn('login response: ', loginResponse);
 
-      throw new Error('Login not implemented');
+      await setItem(STORAGE_KEYS.AUTH_TOKEN, loginResponse.token);
+
+      setUser(loginResponse.user);
+      setToken(loginResponse.token);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);
@@ -86,21 +103,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   /**
    * Logout function
-   *
-   * TODO: Implement this function
    */
   const logout = async (): Promise<void> => {
     try {
       setIsLoading(true);
 
-      // TODO: Call logout API (optional, can fail gracefully)
-      // TODO: Remove token from AsyncStorage
-      // TODO: Clear state
+      await apiLogout();
+      await removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      setUser(null);
+      setToken(null);
+      setError(null);
 
-      throw new Error('Logout not implemented');
     } catch (err) {
       console.error('Logout error:', err);
-      // Even if API call fails, clear local state
+
+      setUser(null);
+      setToken(null);
+      setError(null);
     } finally {
       setIsLoading(false);
     }
