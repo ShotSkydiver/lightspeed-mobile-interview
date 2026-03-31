@@ -29,79 +29,156 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
 import { RootStackScreenProps } from '../navigation/types';
-// TODO: Import API functions from todos.api
-// TODO: Import components (TodoItem, AddTodoForm, LoadingSpinner, Button)
-// TODO: Import useAuth hook
-// TODO: Import Todo type
-// TODO: Import theme for styling
+import { getTodos, createTodo, updateTodo, deleteTodo } from '@/api/todos.api';
+
+import { TodoItem } from '@/components/TodoItem';
+import { AddTodoForm } from '@/components/AddTodoForm';
+import { Button } from '@/components/common/Button';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+
+import { useAuth } from '@/context/AuthContext';
+import { Todo } from '@/types/todo.types';
+import { styles as appStyles } from '@/styles/App.styles';
 
 type Props = RootStackScreenProps<'Todos'>;
 
 const TodosScreen: React.FC<Props> = ({ navigation }) => {
-  // TODO: Add state for todos, loading, error
-  // TODO: Get logout function from useAuth
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [newTodo, setNewTodo] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
+  const authContext = useAuth();
 
   /**
    * Fetch todos from API
-   * TODO: Implement this function
    */
   const loadTodos = async () => {
-    // TODO: Implement
+    setIsLoading(true);
+    setErrorMessage('');
+
+    try {
+      const loadedTodos = await getTodos();
+      setTodos(loadedTodos);
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'There was an error loading the todos list! Please try again.');
+    }
+    setIsLoading(false);
   };
 
   /**
    * Load todos on component mount
    */
   useEffect(() => {
-    // TODO: Call loadTodos
+    loadTodos();
   }, []);
 
   /**
    * Handle adding a new todo
-   * TODO: Implement this function
    */
   const handleAddTodo = async (title: string) => {
-    // TODO: Implement
+    setIsLoading(true);
+    setErrorMessage('');
+
+    try {
+      const newTodo = await createTodo({ title });
+      setTodos([ newTodo, ...todos ]);
+      setNewTodo('');
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'There was an error creating this todo.');
+    }
+    setIsLoading(false);
   };
 
   /**
    * Handle toggling todo completion
-   * TODO: Implement this function
    */
   const handleToggleTodo = async (id: number, completed: boolean) => {
-    // TODO: Implement with optimistic update
+    const previousTodos = todos;
+
+    setErrorMessage('');
+    setTodos(previous => previous.map(todo => todo.id === id ? { ...todo, completed: !completed } : todo));
+
+    try {
+      const updatedTodo = await updateTodo(id, { completed: !completed });
+      setTodos(previous => previous.map(todo => todo.id === id ? updatedTodo : todo));
+    } catch (err) {
+      setTodos(previousTodos);
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to delete todo.')
+    }
   };
 
   /**
    * Handle deleting a todo
-   * TODO: Implement this function
    */
   const handleDeleteTodo = async (id: number) => {
-    // TODO: Implement with optimistic update
+    const previousTodos = todos;
+
+    setErrorMessage('');
+    setTodos(previous => previous.filter(todo => todo.id !== id));
+
+    try {
+      await deleteTodo(id);
+    } catch (err) {
+      setTodos(previousTodos);
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to delete todo.')
+    }
   };
 
   /**
    * Handle logout
-   * TODO: Implement this function
    */
   const handleLogout = async () => {
-    // TODO: Call logout from useAuth
+    try {
+      await authContext.logout();
+      setTodos([]);
+    } catch (err) {
+      console.error('handleLogout error:', err);
+      navigation.replace('Login');
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <Text style={styles.title}>Todos Screen</Text>
-        <Text style={styles.subtitle}>TODO: Implement todos management</Text>
+        <Text style={styles.subtitle}>View and manage your todos</Text>
 
-        {/* TODO: Add header with logout button */}
-        {/* TODO: Add AddTodoForm component */}
-        {/* TODO: Show loading spinner while fetching */}
-        {/* TODO: Show error message if error exists */}
-        {/* TODO: Show empty state if no todos */}
-        {/* TODO: Map over todos and render TodoItem components */}
-        {/* TODO: Show statistics (active/completed count) */}
-      </View>
+        <View style={appStyles.todoHeader}>
+          <Text style={appStyles.todoHeaderText}>Todos</Text>
+          <Button title="Log out" disabled={isLoading} onPress={handleLogout} />
+        </View>
+
+        <AddTodoForm
+          value={newTodo}
+          onChangeText={text => setNewTodo(text)}
+          onSubmit={() => handleAddTodo(newTodo)}
+        />
+
+        <ScrollView style={styles.todoListScrollView} contentContainerStyle={appStyles.todoList}>
+          {isLoading ? (
+            <LoadingSpinner text="Loading todos..." />
+          ) : errorMessage ? (
+            <Text style={appStyles.error}>{errorMessage}</Text>
+          ) : todos.length === 0 ? (
+            <View style={appStyles.emptyState}>
+              <Text style={appStyles.emptyStateText}>No Todos</Text>
+              <Text style={appStyles.emptyStateSubtext}>Create a new todo from the field above.</Text>
+            </View>
+          ) : (
+            <View style={styles.todoListItemsContainer}>
+              {todos.map((todo, index) => (
+                <TodoItem key={index} todo={todo} onToggle={() => handleToggleTodo(todo.id, todo.completed)} onDelete={() => handleDeleteTodo(todo.id)} />
+              ))}
+            </View>
+          )}
+
+        </ScrollView>
+
+        <View style={appStyles.stats}>
+          <Text style={appStyles.statsText}>{todos.filter(todo => todo.completed).length} Completed / {todos.length} Total</Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -109,7 +186,17 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollView: {
     backgroundColor: '#f5f5f5',
+  },
+  todoListScrollView: {
+    width: '80%',
+    paddingHorizontal: 24,
+    paddingVertical: 12
+  },
+  todoListItemsContainer: {
+    width: '100%'
   },
   content: {
     flex: 1,

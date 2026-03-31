@@ -78,13 +78,22 @@ export const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.xl,
   },
+  todoHeaderText: {
+    fontSize: typography.fontSize.md,
+    // color: colors.danger,
+    fontWeight: typography.fontWeight.semibold,
+  },
   logoutText: {
     fontSize: typography.fontSize.md,
     color: colors.danger,
     fontWeight: typography.fontWeight.semibold,
   },
   todoList: {
-    flex: 1,
+    // flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 100,
+    minWidth: '70%'
   },
   emptyState: {
     alignItems: 'center',
