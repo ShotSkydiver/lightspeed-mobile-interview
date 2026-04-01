@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { TodoItem } from '../src/components/TodoItem';
+import { AddTodoForm } from '@/components/AddTodoForm';
 import { Todo } from '../src/types/todo.types';
 
 describe('TodoItem Component', () => {
@@ -19,6 +20,8 @@ describe('TodoItem Component', () => {
 
   const mockOnToggle = jest.fn();
   const mockOnDelete = jest.fn();
+  const mockOnChangeText = jest.fn();
+  const mockOnSubmit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -32,6 +35,52 @@ describe('TodoItem Component', () => {
     expect(getByText('Test Todo')).toBeTruthy();
   });
 
+  it('calls onSubmit when a new todo item is created by the user', () => {
+    const { getByTestId, rerender } = render(
+      <AddTodoForm
+        value=""
+        onChangeText={mockOnChangeText}
+        onSubmit={mockOnSubmit}
+        testID="add-todo-form"
+      />
+    );
+
+    const addTodoFormTextInput = getByTestId('add-todo-form-text-input');
+    fireEvent.changeText(addTodoFormTextInput, 'Test Todo #2');
+    expect(mockOnChangeText).toHaveBeenCalledWith('Test Todo #2');
+
+    rerender(
+      <AddTodoForm
+        value="Test Todo #2"
+        onChangeText={mockOnChangeText}
+        onSubmit={mockOnSubmit}
+        testID="add-todo-form"
+      />
+    );
+
+    const addButton = getByTestId('add-todo-form-add-button');
+    fireEvent.press(addButton);
+
+    expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it('displays an error when a new todo item is created with nothing in the text input', () => {
+    const { getByTestId } = render(
+      <AddTodoForm
+        value=""
+        onChangeText={mockOnChangeText}
+        onSubmit={mockOnSubmit}
+        testID="add-todo-form"
+      />
+    );
+
+    const addButton = getByTestId('add-todo-form-add-button');
+    fireEvent.press(addButton);
+
+    const errorText = getByTestId('add-todo-form-text-input-error');
+    expect(errorText).toBeTruthy();
+  });
+
   it('calls onToggle when checkbox is pressed', () => {
     const { getByTestId } = render(
       <TodoItem
@@ -43,20 +92,23 @@ describe('TodoItem Component', () => {
     );
 
     // Find the touchable area that contains the checkbox
-    const todoItem = getByTestId('todo-item');
-    const touchable = todoItem.children[0]; // First child is the TouchableOpacity
-
+    const touchable = getByTestId('todo-item-toggle-button');
     fireEvent.press(touchable);
 
     expect(mockOnToggle).toHaveBeenCalledTimes(1);
   });
 
   it('calls onDelete when delete button is pressed', () => {
-    const { getByText } = render(
-      <TodoItem todo={mockTodo} onToggle={mockOnToggle} onDelete={mockOnDelete} />
+    const { getByTestId } = render(
+      <TodoItem
+        todo={mockTodo}
+        onToggle={mockOnToggle}
+        onDelete={mockOnDelete}
+        testID="todo-item"
+      />
     );
 
-    const deleteButton = getByText('Delete');
+    const deleteButton = getByTestId('todo-item-delete-button');
     fireEvent.press(deleteButton);
 
     expect(mockOnDelete).toHaveBeenCalledTimes(1);
@@ -86,10 +138,11 @@ describe('TodoItem Component', () => {
     );
 
     const titleText = getByText('Test Todo');
-    const hasStrikethrough = titleText.props.style.some(
-      (style: any) => style?.textDecorationLine === 'line-through'
-    );
 
-    expect(hasStrikethrough).toBeFalsy();
+    expect(titleText.props.style).not.toContainEqual(
+      expect.objectContaining({
+        textDecorationLine: 'line-through',
+      })
+    );
   });
 });

@@ -28,12 +28,6 @@ export const styles = StyleSheet.create({
     fontSize: typography.fontSize.md,
     color: colors.textSecondary,
   },
-  error: {
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.danger,
-    marginVertical: spacing.sm,
-  },
   form: {
     width: '100%',
     maxWidth: 400,
@@ -56,6 +50,16 @@ export const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.highlightText,
     textAlign: 'center',
+  },
+  error: {
+    alignItems: 'center',
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
+  },
+  errorText: {
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.danger,
   },
   footer: {
     marginTop: spacing.huge,
@@ -89,11 +93,10 @@ export const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.semibold,
   },
   todoList: {
-    // flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: 100,
-    minWidth: '70%'
+    minWidth: '90%'
   },
   emptyState: {
     alignItems: 'center',

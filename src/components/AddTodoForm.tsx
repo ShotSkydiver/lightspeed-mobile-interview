@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { colors, borderRadius, spacing, typography } from '../styles/theme';
 
@@ -7,6 +7,7 @@ export interface AddTodoFormProps {
   onChangeText: (text: string) => void;
   onSubmit: () => void;
   placeholder?: string;
+  disabled?: boolean;
   testID?: string;
 }
 
@@ -18,19 +19,55 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({
   onChangeText,
   onSubmit,
   placeholder = 'Add a new todo...',
+  disabled = false,
   testID,
 }) => {
+  const [hasError, setHasError] = useState<boolean>(false);
+
   return (
     <View style={styles.container} testID={testID}>
-      <TextInput
-        style={styles.input}
-        placeholder={placeholder}
-        placeholderTextColor={colors.textTertiary}
-        value={value}
-        onChangeText={onChangeText}
-        onSubmitEditing={onSubmit}
-      />
-      <TouchableOpacity style={styles.addButton} onPress={onSubmit}>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[
+            styles.input,
+            hasError ? styles.inputError : null,
+          ]}
+          placeholder={placeholder}
+          editable={!disabled}
+          placeholderTextColor={colors.textTertiary}
+          value={value}
+          onChangeText={text => {
+            onChangeText(text);
+
+            if (text) {
+              setHasError(false);
+            }
+          }}
+          onSubmitEditing={() => {
+            if (!value) {
+              setHasError(true);
+              return;
+            }
+
+            onSubmit();
+          }}
+          testID={`${testID}-text-input`}
+        />
+        {hasError && <Text testID={`${testID}-text-input-error`} style={styles.inputErrorText}>A todo must have text</Text>}
+      </View>
+      <TouchableOpacity
+        testID={`${testID}-add-button`}
+        disabled={disabled}
+        style={styles.addButton}
+        onPress={() => {
+          if (!value) {
+            setHasError(true);
+            return;
+          }
+
+          onSubmit();
+        }}
+      >
         <Text style={styles.addButtonText}>Add</Text>
       </TouchableOpacity>
     </View>
@@ -41,9 +78,17 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     marginBottom: spacing.xl,
+    minHeight: 48,
+  },
+  inputContainer: {
+    flexDirection: 'column',
+    flexGrow: 1,
   },
   input: {
     flex: 1,
+    flexGrow: 1,
+    alignSelf: 'stretch',
+    minHeight: 48,
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
@@ -53,12 +98,21 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginRight: spacing.sm,
   },
+  inputError: {
+    borderColor: colors.danger,
+  },
+  inputErrorText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.danger,
+    marginTop: 2,
+  },
   addButton: {
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.xl,
     borderRadius: borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
+    height: 48,
   },
   addButtonText: {
     color: colors.white,

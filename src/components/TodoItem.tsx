@@ -7,16 +7,17 @@ export interface TodoItemProps {
   todo: Todo;
   onToggle: () => void;
   onDelete: () => void;
+  actionsDisabled?: boolean;
   testID?: string;
 }
 
 /**
  * TodoItem component displays a single todo with toggle and delete actions
  */
-export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, testID }) => {
+export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, actionsDisabled = false, testID }) => {
   return (
     <View style={styles.todoItem} testID={testID}>
-      <TouchableOpacity style={styles.todoContent} onPress={onToggle}>
+      <TouchableOpacity style={styles.todoContent} onPress={onToggle} testID={`${testID}-toggle-button`}>
         <View style={[styles.checkbox, todo.completed && styles.checkboxChecked]}>
           {todo.completed && <Text style={styles.checkmark}>✓</Text>}
         </View>
@@ -24,7 +25,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete, te
           {todo.title}
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+      <TouchableOpacity disabled={actionsDisabled} onPress={onDelete} style={styles.deleteButton} testID={`${testID}-delete-button`}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
     </View>

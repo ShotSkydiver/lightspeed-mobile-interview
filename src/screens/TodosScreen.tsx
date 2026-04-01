@@ -46,6 +46,7 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isMakingAPICall, setIsMakingAPICall] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const authContext = useAuth();
@@ -77,7 +78,7 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
    * Handle adding a new todo
    */
   const handleAddTodo = async (title: string) => {
-    setIsLoading(true);
+    setIsMakingAPICall(true);
     setErrorMessage('');
 
     try {
@@ -87,7 +88,7 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'There was an error creating this todo.');
     }
-    setIsLoading(false);
+    setIsMakingAPICall(false);
   };
 
   /**
@@ -96,6 +97,7 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
   const handleToggleTodo = async (id: number, completed: boolean) => {
     const previousTodos = todos;
 
+    setIsMakingAPICall(true);
     setErrorMessage('');
     setTodos(previous => previous.map(todo => todo.id === id ? { ...todo, completed: !completed } : todo));
 
@@ -106,6 +108,8 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
       setTodos(previousTodos);
       setErrorMessage(err instanceof Error ? err.message : 'Failed to delete todo.')
     }
+
+    setIsMakingAPICall(false);
   };
 
   /**
@@ -114,6 +118,7 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
   const handleDeleteTodo = async (id: number) => {
     const previousTodos = todos;
 
+    setIsMakingAPICall(true);
     setErrorMessage('');
     setTodos(previous => previous.filter(todo => todo.id !== id));
 
@@ -123,6 +128,8 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
       setTodos(previousTodos);
       setErrorMessage(err instanceof Error ? err.message : 'Failed to delete todo.')
     }
+
+    setIsMakingAPICall(false);
   };
 
   /**
@@ -151,15 +158,19 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
 
         <AddTodoForm
           value={newTodo}
-          onChangeText={text => setNewTodo(text)}
+          onChangeText={setNewTodo}
           onSubmit={() => handleAddTodo(newTodo)}
+          disabled={isMakingAPICall}
         />
+
+
+          <View style={appStyles.error}>
+            {!!errorMessage && <Text style={appStyles.errorText}>{errorMessage}</Text>}
+          </View>
 
         <ScrollView style={styles.todoListScrollView} contentContainerStyle={appStyles.todoList}>
           {isLoading ? (
             <LoadingSpinner text="Loading todos..." />
-          ) : errorMessage ? (
-            <Text style={appStyles.error}>{errorMessage}</Text>
           ) : todos.length === 0 ? (
             <View style={appStyles.emptyState}>
               <Text style={appStyles.emptyStateText}>No Todos</Text>
@@ -168,7 +179,7 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
           ) : (
             <View style={styles.todoListItemsContainer}>
               {todos.map((todo, index) => (
-                <TodoItem key={index} todo={todo} onToggle={() => handleToggleTodo(todo.id, todo.completed)} onDelete={() => handleDeleteTodo(todo.id)} />
+                <TodoItem key={index} todo={todo} actionsDisabled={isMakingAPICall} onToggle={() => handleToggleTodo(todo.id, todo.completed)} onDelete={() => handleDeleteTodo(todo.id)} />
               ))}
             </View>
           )}
@@ -176,7 +187,7 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
         </ScrollView>
 
         <View style={appStyles.stats}>
-          <Text style={appStyles.statsText}>{todos.filter(todo => todo.completed).length} Completed / {todos.length} Total</Text>
+          <Text style={appStyles.statsText}>{todos.filter(todo => !todo.completed).length} Active • {todos.filter(todo => todo.completed).length} Completed</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -191,12 +202,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   todoListScrollView: {
-    width: '80%',
+    width: '100%',
     paddingHorizontal: 24,
-    paddingVertical: 12
+    paddingVertical: 12,
+    marginTop: 28
   },
   todoListItemsContainer: {
-    width: '100%'
+    width: '100%',
+    paddingBottom: 16
   },
   content: {
     flex: 1,
