@@ -15,8 +15,8 @@ export const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginTop: spacing.huge,
-    marginBottom: spacing.huge,
+    marginTop: spacing.xxl,
+    marginBottom: spacing.xxl,
   },
   title: {
     fontSize: typography.fontSize.xxl,
@@ -53,8 +53,7 @@ export const styles = StyleSheet.create({
   },
   error: {
     alignItems: 'center',
-    marginTop: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   errorText: {
     fontSize: typography.fontSize.md,
@@ -77,20 +76,24 @@ export const styles = StyleSheet.create({
   },
   todoHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
-    marginTop: spacing.xl,
-    marginBottom: spacing.xl,
+    width: '100%',
+    marginTop: spacing.xxl,
+    marginBottom: spacing.xxl,
   },
   todoHeaderText: {
     fontSize: typography.fontSize.md,
-    // color: colors.danger,
     fontWeight: typography.fontWeight.semibold,
   },
   logoutText: {
     fontSize: typography.fontSize.md,
     color: colors.danger,
     fontWeight: typography.fontWeight.semibold,
+  },
+  logoutButton: {
+    marginTop: 0,
+    backgroundColor: colors.danger,
   },
   todoList: {
     justifyContent: 'center',

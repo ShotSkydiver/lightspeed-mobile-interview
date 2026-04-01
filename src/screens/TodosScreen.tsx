@@ -3,27 +3,6 @@
  *
  * Main screen for displaying and managing todos.
  *
- * TODO: Implement this screen following the requirements below:
- *
- * Requirements:
- * 1. Fetch todos on component mount using fetchTodos() API
- * 2. Display list of todos using TodoItem component
- * 3. Add new todos using AddTodoForm component
- * 4. Implement toggle completion (call updateTodo API)
- * 5. Implement delete todo (call deleteTodo API)
- * 6. Show loading state while fetching
- * 7. Show empty state when no todos exist
- * 8. Add logout button in header
- * 9. Display todo statistics (active/completed count)
- * 10. Implement optimistic updates for better UX
- *
- * Hints:
- * - Use the API functions from '../api/todos.api'
- * - Use the TodoItem and AddTodoForm components
- * - Use the useAuth hook to access logout function
- * - Use useState for managing todos state
- * - Use useEffect to fetch todos on mount
- * - Handle errors gracefully
  */
 
 import React, { useState, useEffect } from 'react';
@@ -148,12 +127,12 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Todos Screen</Text>
-        <Text style={styles.subtitle}>View and manage your todos</Text>
-
         <View style={appStyles.todoHeader}>
-          <Text style={appStyles.todoHeaderText}>Todos</Text>
-          <Button title="Log out" disabled={isLoading} onPress={handleLogout} />
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Todos Screen</Text>
+            <Text style={styles.subtitle}>View and manage your todos</Text>
+          </View>
+          <Button title="Log out" disabled={isLoading} onPress={handleLogout} customStyle={appStyles.logoutButton} />
         </View>
 
         <AddTodoForm
@@ -163,10 +142,9 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
           disabled={isMakingAPICall}
         />
 
-
-          <View style={appStyles.error}>
-            {!!errorMessage && <Text style={appStyles.errorText}>{errorMessage}</Text>}
-          </View>
+        <View style={appStyles.error}>
+          {!!errorMessage && <Text style={appStyles.errorText}>{errorMessage}</Text>}
+        </View>
 
         <ScrollView style={styles.todoListScrollView} contentContainerStyle={appStyles.todoList}>
           {isLoading ? (
@@ -183,7 +161,6 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
               ))}
             </View>
           )}
-
         </ScrollView>
 
         <View style={appStyles.stats}>
@@ -197,6 +174,7 @@ const TodosScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: 48
   },
   scrollView: {
     backgroundColor: '#f5f5f5',
@@ -210,6 +188,9 @@ const styles = StyleSheet.create({
   todoListItemsContainer: {
     width: '100%',
     paddingBottom: 16
+  },
+  headerText: {
+    alignItems: 'center',
   },
   content: {
     flex: 1,

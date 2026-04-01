@@ -2,25 +2,6 @@
  * Authentication Context
  *
  * Global state management for user authentication.
- *
- * TODO: Implement this context following the requirements below:
- *
- * Requirements:
- * 1. Manage authentication state (user, token, isLoading, isAuthenticated)
- * 2. Implement login() function that:
- *    - Calls the login API
- *    - Stores token in AsyncStorage
- *    - Updates context state
- * 3. Implement logout() function that:
- *    - Clears token from AsyncStorage
- *    - Resets context state
- * 4. On mount, check AsyncStorage for existing token and validate it
- * 5. Handle errors and expose them via context
- *
- * Hints:
- * - Use the login() and getCurrentUser() functions from '../api/auth.api'
- * - Use setItem(), getItem(), removeItem() from '../utils/storage'
- * - Use STORAGE_KEYS.AUTH_TOKEN from '../utils/constants'
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -46,23 +27,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   /**
    * Check for existing token on mount
    *
-   * TODO: Implement this useEffect
-   * 1. Get token from AsyncStorage
-   * 2. If token exists, validate it by calling getCurrentUser()
-   * 3. Update state based on result
-   * 4. Set isLoading to false when done
    */
   useEffect(() => {
     const checkExistingToken = async () => {
       try {
-        console.warn('before check existing??');
         const existingToken = await getItem(STORAGE_KEYS.AUTH_TOKEN);
-        console.warn('existing?? ', existingToken);
 
         if (existingToken) {
           const currentUser = await getCurrentUser();
-          // TODO: SHOULD I ADD THE CURRENTUSER OBJECT TO STORAGE AS WELL? with STORAGE_KEYS.USER_DATA
-
           setUser(currentUser);
           setToken(existingToken);
         }

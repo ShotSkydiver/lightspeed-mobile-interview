@@ -5,7 +5,6 @@
  * This provides type safety for navigation props and route params.
  */
 
-import { NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 /**
@@ -27,8 +26,11 @@ export type RootStackScreenProps<T extends keyof RootStackParamList> = NativeSta
 /**
  * Declare global types for navigation
  * This allows useNavigation() to be fully typed without explicit generics
+ * @see https://reactnavigation.org/docs/typescript/#specifying-default-types-for-usenavigation-etc
  */
 declare global {
+  // React Navigation types `useNavigation` via global interface merging on `ReactNavigation.RootParamList`, not ES modules.
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- required global augmentation for React Navigation
   namespace ReactNavigation {
     interface RootParamList extends RootStackParamList {}
   }

@@ -4,7 +4,7 @@
  * Axios instance with interceptors for authentication and error handling.
  */
 
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import axios, { AxiosError } from 'axios';
 import { API_BASE_URL, API_TIMEOUT, STORAGE_KEYS } from '../utils/constants';
 import { getItem } from '../utils/storage';
 

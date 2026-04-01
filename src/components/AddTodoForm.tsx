@@ -77,7 +77,8 @@ export const AddTodoForm: React.FC<AddTodoFormProps> = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    marginBottom: spacing.xl,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
     minHeight: 48,
   },
   inputContainer: {

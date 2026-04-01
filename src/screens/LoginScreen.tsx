@@ -2,25 +2,6 @@
  * Login Screen
  *
  * Screen for user authentication.
- *
- * TODO: Implement this screen following the requirements below:
- *
- * Requirements:
- * 1. Create a form with email and password inputs (use Input component)
- * 2. Add a login button (use Button component)
- * 3. Use the useAuth hook to access login function
- * 4. Call login() when button is pressed
- * 5. Show loading state while logging in
- * 6. Display error messages if login fails
- * 7. Disable button when fields are empty
- * 8. Clear form after successful login
- *
- * Hints:
- * - Use the Button and Input components from '../components/common'
- * - Use the useAuth hook from '../context/AuthContext'
- * - Use SafeAreaView, ScrollView for proper layout
- * - Show the LoadingSpinner component while isLoading is true
- * - Test credentials: test@example.com / password
  */
 
 import React, { useState } from 'react';
@@ -34,12 +15,24 @@ import { styles as appStyles } from '@/styles/App.styles';
 
 type Props = RootStackScreenProps<'Login'>;
 
-const LoginScreen: React.FC<Props> = ({ navigation }) => {
+const LoginScreen: React.FC<Props> = () => {
   const [email, setEmail] = useState<string>('');
+  const [emailValidationError, setEmailValidationError] = useState<boolean>(false);
   const [password, setPassword] = useState<string>('');
   const authContext = useAuth();
 
+  const validateEmail = (inputText: string) => {
+    const emailRegex = /\S+@\S+\.\S+/;
+
+    return emailRegex.test(inputText);
+  };
+
   const handleLogin = async () => {
+    if (!validateEmail(email)) {
+      setEmailValidationError(true);
+      return;
+    }
+
     try {
       await authContext.login(email, password);
 
@@ -47,7 +40,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       setPassword('');
 
       // No need to manually navigate to TodosScreen, RootNavigator will automatically switch to that screen once isAuthenticated is true
-      // navigation.replace('Todos')
     } catch (err) {
       console.error('handleLogin error:', err);
     }
@@ -60,7 +52,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.subtitle}>Enter your email and password below.</Text>
 
         <View style={appStyles.form}>
-          <Input placeholder="Email" value={email} onChangeText={text => setEmail(text)} />
+          <Input
+            placeholder="Email"
+            value={email}
+            hasError={emailValidationError}
+            errorMessage="Not a valid email address"
+            onChangeText={text => {
+              setEmailValidationError(false);
+              setEmail(text);
+            }}
+            keyboardType="email-address"
+          />
           <View style={styles.spacer} />
           <Input placeholder="Password" value={password} onChangeText={text => setPassword(text)} secureTextEntry />
         </View>
@@ -68,7 +70,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         <Button title="Log in" disabled={authContext.isLoading || (!email || !password)} onPress={handleLogin} />
 
         {authContext.error && (
-          <Text style={appStyles.error}>{authContext.error}</Text>
+          <Text style={appStyles.errorText}>{authContext.error}</Text>
         )}
 
         {authContext.isLoading && (
